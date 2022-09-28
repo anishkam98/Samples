@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <meta name="author" content="Anishka Mendez">
+    <meta name="keywords" content="Coding Sample, HTML, CSS, JavaScript, jQuery"> 
+    <title>Password Changing Prototype</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+
+<body>
+    <div id="monitor">
+        <div class="msg">Enter New Password</div>
+        <form id="passdisplaycontainer">
+            <div id="blinkcursor">|</div>
+            <input name="totalpasslength" id="totalpasslength" type="hidden" value="">
+            <input type="hidden" name="passcombo" id="passcombo" value="" />
+            <select name="passcombo" id="passcontainer" hidden multiple></select>
+        </form>
+    </div>
+    <div id="passchangecontainer">
+        <div id="passoptions">         
+            <button onclick="addtext('4','1', '1')">4</button>
+            <button onclick="addtext('7', '2', '1')">7</button>
+            <button onclick="addtext('password', '3', '8')">password</button>
+            <button onclick="addtext('9', '4', '1')">9</button>
+            <button onclick="addtext('123', '5', '3')">123</button>
+            <button onclick="addtext('0', '6', '1')">0</button>
+            <button onclick="addtext('password123', '7', '11')">password123</button>
+            <button onclick="addtext('PlayerName', '8', 'calculate')">PlayerName</button>
+            <button onclick="addtext('1', '9', '1')">1</button>
+            <button onclick="addtext('2', '10', '1')">2</button>
+            <button onclick="addtext('qwerty', '11', '6')">qwerty</button>
+            <button onclick="addtext('8', '12', '1')">8</button>
+            <button onclick="addtext('PetName', '13', 'calculate')">PetName</button>
+            <button onclick="addtext('3', '14', '1')">3</button>
+            <button onclick="addtext('5', '15', '1')">5</button>
+            <button onclick="addtext('6', '16', '1')">6</button>
+            <button onclick="addtext('123456', '17', '6')">123456</button>
+            <button onclick="addtext('123456789', '18', '9')">123456789</button>
+            <button onclick="addtext('111111', '19', '6')">111111</button>
+            <button onclick="addtext('digitalpass', '20', '7')">digital</button>
+            <button onclick="addtext('playerfirstname', '21', 'calculate')">playerfirstname</button>
+            <button onclick="addtext('playerlastname', '22', 'calculate')">playerlastname</button>
+            <button onclick="addtext('playeremail', '23', 'calculate')">playeremail</button>
+            <button onclick="addtext('digital', '24', '6')">banana</button>
+            <button onclick="addtext('pass', '25', '4')">pass</button>
+            <button onclick="addtext('!', '26', '1')">!</button>
+            <button onclick="addtext('@', '27', '1')">@</button>
+            <button onclick="addtext('$', '28', '1')">$</button>
+            <button onclick="addtext('horse', '29', '5')">horse</button>
+            <button onclick="addtext('sponge', '30', '6')">sponge</button>
+            <button onclick="addtext('dictionary', '31', '10')">dictionary</button>
+            <button onclick="addtext('robot', '32', '4')">bass</button>
+            <button onclick="addtext('1337', '33', '4')">1337</button>
+            <button onclick="addtext('P@$$w0rd', '34', '8')">P@$$w0rd</button>
+        </div>
+        <div id="keycontainer">
+            <div id="backspace">Backspace</div>
+            <div id="enter">Enter</div>
+        </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script>
+        // Initialize passlength for total password length
+        let passlength = 0;
+        // If content is added the the password display
+        function addtext(text, value, length) {
+            // Add an option element to the password display select element
+            $("#passcontainer").append('<option value="'+value+'" data-length="'+length+'" class="selectedpassoption">'+text+'</option>');
+            // If there is content, hide the blinking blinkcursor
+            if($('#passcontainer').has('option').length > 0) {
+                $('#passcontainer').attr('hidden', false);
+                $('#blinkcursor').attr('hidden', true).css('display', 'none');
+                /* If custom content/fakeid information was in the content
+                 calculate its length */
+                if (String(length) == 'calculate') {
+                    for (let i = 0; i < String(text).length; i++) {
+                        // Update the total password length
+                        passlength += 1;
+                    }
+                }else {
+                    // Update the total password length
+                    passlength += parseInt(length)
+                }
+            }
+        }
+
+        // Show a left arrow instead of "Backspace" for phones
+        if($( window ).width() < 600 || $( window ).height() < 413){
+            $("#backspace").text("\u2190");
+        }else{
+            $("#backspace").text("Backspace");
+        }
+        $(function () {
+            // If the backspace button is clicked
+            $('#backspace').click(function () {
+                // If the password display has content
+                if($('#passcontainer').has('option').length > 0) {
+                    // Get the text and length of the content on the end
+                    let text = $('#passcontainer option:last').text();
+                    let length = $('#passcontainer option:last').data('length');
+                    // Remove the content from the password display
+                    $('#passcontainer option:last').remove();
+                    if($('#passcontainer').has('option').length == 0){
+                        // Show the blinking blinkcursor if the password display has no content
+                        $('#blinkcursor').attr('hidden', false).css('display', 'flex');
+                    }
+                    /* If custom content/fakeid information was in the content
+                     calculate its length */
+                    if (String(length) == 'calculate') {
+                        for (let i = 0; i < String(text).length; i++) {
+                            // Update the total password length
+                            passlength -= 1;
+                        }
+                    } else {
+                        // Update the total password length
+                        passlength -= parseInt(length);
+                    }
+                }
+            })   
+            
+            $('#enter').click(function () {
+                // Check if a password combination was chosen
+                if($('#passcontainer').has('option').length == 0){
+                    $('.msg').text('Please enter a password').css('color', 'red');
+                } else if(passlength > 20) {
+                    // Display error message if maximum length was exceeded
+                    $('.msg').text('The maximum length is 20. Please enter a shorter password.').css('color', 'red');
+                } else{
+                    // If the password combination input is valid
+                    $('.msg').text('Your password has been changed').css('color', 'black');
+                    // Make sure all options are selected
+                    $("#passcontainer").find("option").prop("selected", true);
+                    // Create a list of all selected options
+                    let submittedval = Array.from($('#passcontainer option:selected')).map(el => el.value)
+                    // Put values in the appropriate inputs
+                    $('#totalpasslength').val(passlength);
+                    $('#passcombo').val(submittedval);
+                    // Submit this form
+                    //$("#passchangeform").submit();
+                    // Display output in console instead
+                    console.log('Length: ' + $('#totalpasslength').val())
+                    console.log('Password combo ID(s): ' + $('#passcombo').val())
+                }     
+            })
+        })
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,231 @@
+body {
+    height: 100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content: center;
+    align-items: center;
+    background-image: url(images/laptop-g8c0c98b90_1920.jpg);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-attachment: fixed;
+    background-size:cover;
+    font-family: "Gill Sans", "Gill Sans MT", "Myriad Pro", "DejaVu Sans Condensed", Helvetica, Arial, "sans-serif";
+}
+#monitor{
+    display:flex; 
+    flex-direction:column;
+    width:50%;
+    height:40%;
+    border:8px solid #303030;
+    border-radius: 3px;
+    align-items: center;
+    justify-content: center;
+    margin-bottom:5%;
+    background-color: white;
+}
+#passdisplaycontainer {
+    display:flex; 
+    flex-direction:row;
+    width:65%;
+    height:30%;
+    border:3px solid black;
+    align-items: center;
+}     
+.msg{
+    font-size:1.2em;
+}
+#passcontainer {
+    width:95%;
+    height:50%;
+    overflow-x: auto;
+    margin-left:auto;
+    margin-right: auto;
+}
+#passchangecontainer {
+    display:flex; 
+    flex-direction:row;
+    justify-content: center;
+    align-items: center;
+    width:50%;
+    height:30%;
+    border:5px solid #303030;
+    background-color: #303030;
+    border-radius: 3px;
+}
+#passoptions {
+    height:90%;
+    width:83%;
+    overflow-wrap: break-word;
+    display: flex;
+    flex-wrap: wrap;
+    overflow-y: scroll;
+    align-content: flex-start;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;
+}
+#passoptions::-webkit-scrollbar {
+    display: none;
+}
+#keycontainer{
+    height:30%;
+    width:14%;
+}
+#backspace {
+    border:1px solid #484848;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    height:48%;
+    word-wrap: break-word;
+    width:100%;
+    box-shadow:0 2px #343434;
+    background-color:  #484848;
+    color:white;
+    border-style: outset;
+}
+#backspace:hover {
+    transform:translateY(1px);
+    box-shadow:0 1px #343434;
+}
+#enter {
+    border:1px solid #484848;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    height:50%;
+    word-wrap: break-word;
+    width:100%;
+    box-shadow:0 2px #343434;
+    background-color: #484848;
+    color:white;
+    border-style: outset;
+}
+#enter:hover {
+    transform:translateY(1px);
+    box-shadow:0 1px #343434;
+}
+select#passcontainer {
+    display: table-row;
+    appearance: none !important;
+    -o-appearance: none !important;
+    -ms-appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    outline: none;
+    border:none;
+    overflow-x:auto;
+    overflow-y:hidden;
+    height:55%;
+    margin-top:2%;
+}
+select#passcontainer::-webkit-scrollbar {
+    width: 5px;
+}
+select#passcontainer::-webkit-scrollbar-thumb {
+background: gray; 
+border-radius: 10px;
+}
+select#passcontainer::-webkit-scrollbar-thumb:hover {
+    background: #606060; 
+}
+option.selectedpassoption {
+    display:table-cell;
+    height:100%;
+    font-size:2em;
+}
+#passoptions button {
+    box-shadow:0 2px #343434;
+    word-wrap: break-word;
+    width:fit-content;
+    text-align:start;
+    padding: 2% !important;
+    height: 20%;
+    background-color:#484848;
+    color:white;
+    border-color:#484848;
+}
+#passoptions button:hover {
+    transform:translateY(0.5px);
+    box-shadow:0 1px #343434;
+}
+#blinkcursor {
+    text-align: justify;
+    animation: blink 0.8s steps(1);
+    animation-iteration-count: infinite;
+    display: flex;
+    align-items: center;
+    font-size:2.5em;
+}
+#blinkcursor:after {
+    content: "";
+    display: inline-block;
+    width:100%;
+}
+@keyframes blink {
+    0% {opacity: 1;}
+    50% {opacity: 0;}
+}
+@media only screen and (max-width: 600px) {
+    #monitor{
+        width:75%;
+        height:40%;
+    }
+    #passchangecontainer {
+        width:75%;
+        height:30%;
+    }
+    #passdisplaycontainer {
+        height:20%;
+    }
+    option.selectedpassoption {
+        font-size:1em;
+        font-weight: 525;
+    }  
+}
+/* Small devices (portrait tablets and large phones, 600px and up) */
+@media (min-width: 600px) and (max-width: 768px) {
+    #monitor{
+        width:75%;
+        height:40%;
+    }
+    #passchangecontainer {
+        width:75%;
+        height:30%;
+    }
+    #passdisplaycontainer {
+        height:20%;
+    }    
+}
+/* Phones in landscape mode */
+@media (max-height: 412px) and (orientation: landscape) {
+    #monitor {
+        margin-bottom: 2%;
+        height: 35%;
+    }
+    #passchangecontainer {
+        height: 40%;
+    }
+    #passoptions button {
+        padding: 5% !important;
+    }
+    #blinkcursor {
+        font-size:1.5em;
+    }
+    #passdisplaycontainer {
+        height:35%;
+    }   
+    option.selectedpassoption {
+        font-size: 1em;
+    }
+    select#passcontainer {
+        height: 65%;
+    }
+}
+/* Tall devices (ex. iPad Pro) */
+@media (min-height: 936px){
+    #passdisplaycontainer {
+        height: 20%;
+    }
+}
