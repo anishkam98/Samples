@@ -1,5 +1,9 @@
 def db(app):
-      app.secret_key = '324jkh3jk42JvV23'
+      
+      # This secret key is a placeholder and should not be used in deployment
+      # Generate a random string to use for the secret key in deployment and store it somewhere safe
+      # Ex. Can use secrets.token_urlsafe(16), secrets.token_hex(16), uuid.uuid4().hex, os.urandom(12), etc.
+      app.secret_key = '1234'
 
     # Enter database connection details
     # For docker app container with docker database
