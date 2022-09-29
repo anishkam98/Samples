@@ -19,8 +19,6 @@ services:
     depends_on:
       - app
     ports:
-      # Use 81:80 if 80 already in use on Windows
-      #- "81:80"
       - "80:80"
     container_name: chatapp-nginx
     restart: always
