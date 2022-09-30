@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, send_file, jsonify
 from flask_mysqldb import MySQL
+from markupsafe import escape
+from flask_wtf.csrf import CSRFProtect
 import json
 import MySQLdb.cursors
 from file import db
@@ -18,9 +20,22 @@ mysql = MySQL(app)
 app.config["SESSION_TYPE"] = "filesystem"
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 app.jinja_env.auto_reload = True
+app.jinja_options["autoescape"] = lambda _: True
 Session(app)
+csrf = CSRFProtect(app)
 socketio = SocketIO(app, manage_session=False)
 
+app.config.update(
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE='Lax',
+)
+
+@app.after_request
+def apply_caching(response):
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["HTTP-HEADER"] = "VALUE"
+    return response
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
@@ -99,7 +114,7 @@ def main():
         if request.method == 'POST':
             username = request.form['username']
             other_userid = request.form['other_userid']
-            convonamedefault = str(username+','+session['user'].username)
+            convonamedefault = str(username+', '+session['user'].username)
             cursor.execute('INSERT INTO tb_conversations (name) VALUES (%s)', [convonamedefault])
             cursor.execute('SELECT LAST_INSERT_ID() as convoid')
             convoid = cursor.fetchone()
@@ -117,8 +132,13 @@ def chat(id):
     if 'loggedin' in session:
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         # Get existing messages in this chat
-        cursor.execute("SELECT u.user_id, json_extract(Log_content, '$.IM') as IM, u.username FROM tb_log l INNER JOIN tb_users u ON u.user_id=l.user_id  WHERE json_extract(Log_content, '$.chatid') = %s ORDER BY l.created_date", [id])
-        IMs = cursor.fetchall()
+        cursor.execute("SELECT l.log_id, u.user_id, json_extract(Log_content, '$.IM') as IM, u.username, l.created_date FROM tb_log l INNER JOIN tb_users u ON u.user_id=l.user_id  WHERE json_extract(Log_content, '$.chatid') = %s and json_extract(Log_content, '$.deleted') = \"0\" ORDER BY l.created_date", [escape(id)])
+        IMs_log = cursor.fetchall()
+        IMs = []
+        for i in IMs_log:
+            converted_im = json.loads(i['IM'])
+            timestamp = i['created_date'].strftime("%d %b %Y %I:%M:%S %p")
+            IMs.append({'log_id': i['log_id'], 'user_id': i['user_id'], 'IM': converted_im, 'username': i['username'], 'created_date': timestamp})
         return render_template('chat.html', id=id, IMs=IMs)
     else:
         return redirect(url_for('login'))
@@ -136,7 +156,7 @@ def handle_send_message_event(data):
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     # Create an entry in the log table when an IM is sent
     logrecord = json.dumps({'IM': data['message'], 'chatid': data['chatid'], 'deleted': "0"})
-    cursor.execute("INSERT INTO tb_log (user_id, log_type, log_content) VALUES (%s, 'IM', %s)", [data['userid'], logrecord])
+    cursor.execute("INSERT INTO tb_log (user_id, log_type, log_content) VALUES (%s, 'IM', %s)", [escape(data['userid']), logrecord])
     mysql.connection.commit()
     # Retrieve the primary key of the IM log entry
     cursor.execute("SELECT LAST_INSERT_ID() as log_id")
@@ -149,6 +169,16 @@ def handle_send_message_event(data):
     data.update({'timestamp': timestamp, 'log_id': log_id['log_id']})
     # Emit to all players in this chat
     socketio.emit('receive_message', data, to=data['chatid'])
+
+@socketio.on('delete_message')
+def handle_delete_message_event(data):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    logrecord = json.dumps({'type': "IM", 'log_id': data['logid']})
+    # Create an entry in the log table for the deletion request
+    cursor.execute("INSERT INTO tb_log (user_id, log_type, log_content) VALUES (%s, 'deletion request', %s)", [escape(data['userid']), logrecord])
+    # Mark the log entry as deleted
+    cursor.execute("UPDATE tb_log SET log_content = JSON_REPLACE(Log_content, '$.deleted', '1') WHERE log_id = %s", [escape(data['logid'])])
+    mysql.connection.commit()
     
 @socketio.on('leave_room')
 def handle_leave_room_event(data):
@@ -159,14 +189,17 @@ def handle_leave_room_event(data):
 
 @app.route('/logout', methods=['GET'])
 def logout():
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    # Change status to offline
-    cursor.execute('UPDATE tb_users SET is_active = 0 WHERE user_id = %s', [session['user'].userid])
-    mysql.connection.commit()
-    # Remove session data and return to login page
-    session.pop('loggedin', None)
-    session.pop('user', None)
-    return render_template('index.html')
+    if 'loggedin' in session:
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        # Change status to offline
+        cursor.execute('UPDATE tb_users SET is_active = 0 WHERE user_id = %s', [session['user'].userid])
+        mysql.connection.commit()
+        # Remove session data and return to login page
+        session.pop('loggedin', None)
+        session.pop('user', None)
+        return redirect(url_for('login'))
+    else:
+        return redirect(url_for('login'))
   
 
 if __name__ == "__main__":

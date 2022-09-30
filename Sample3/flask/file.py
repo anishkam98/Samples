@@ -5,8 +5,8 @@ def db(app):
       # Ex. Can use secrets.token_urlsafe(16), secrets.token_hex(16), uuid.uuid4().hex, os.urandom(12), etc.
       app.secret_key = '1234'
 
-    # Enter database connection details
-    # For docker app container with docker database
+      # Enter database connection details
+      # For docker app container with docker database
       app.config['MYSQL_HOST'] = 'db'
       app.config['MYSQL_USER'] = ''
       app.config['MYSQL_PASSWORD'] = ''

@@ -45,6 +45,7 @@
         <div id="online-users-container">
             Online Users
             <form id="online-users" action="/main" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <input type="hidden" name="username" value="" id="online-username" />
                 <input type="hidden" name="other_userid" value="" id="online-userid" />
                 {% for u in activeusers %}

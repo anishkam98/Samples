@@ -16,14 +16,17 @@
     <div id="chat-container">
         <div id="message-container">
             {% for i in IMs %}
-            <div class="IMs">{{ i.username }}: {{ i.IM }}</div>
+            <div class="IM-container" id="IM-{{ i.log_id }}">
+                <div class="IMs">{{ i.username }}: {{ i.IM }}<br/><div class="timestamp">{{ i.created_date }}</div></div>
+                <div class="trash-icon-container"><img onclick="deletemessage({{ session['user'].userid }}, {{ i.log_id }})" src="{{url_for('static', filename='/assets/images/garbage-gbf321eba2_1280.png')}}" alt="Trash icon" /></div>
+            </div>
             {% endfor %}
         </div>
-        <form id="textholder">
+        <div id="textholder">
             <input id="message-input" type="textarea" />
             <button type="button" id="send">Send</button>
             <a href="{{ url_for('main') }}">&larr;</a>
-        </form>
+        </div>
     </div>
     <script src="{{url_for('static', filename='/assets/bootstrap/js/bootstrap.min.js')}}"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
@@ -42,39 +45,63 @@
                 userid: "{{ session['user'].userid }}",
                 username: "{{ session['user'].username }}"
 
-            });
+            })
         });
 
         socket.on('join_room_announcement', function(data) {
             if (data.username !== "{{ session['user'].username }}") {
                 $('#message-container').append(
                     '<div>' + data.username + ' is active in the chat.</div>'
-                );
+                )
             }
         });
 
         socket.on('leave_room_announcement', function (data) {
             $('#message-container').append(
                     '<div>' + data.username + ' is no longer active in the chat.</div>'
-            );
+            )
         });
 
-        $('#send').click(function () {
-            let message = $('#message-input').val();
-            socket.emit('send_message', {
-                chatid: "{{ id }}",
-                userid: "{{ session['user'].userid }}",
-                username: "{{ session['user'].username }}",
-                message: message
+        
+
+        // Click send button if enter key is pressed
+        $(document).on('keypress', function(e) {
+            if(e.which === 13) {
+                $('#send').click();
+            }
+        });
+
+        $(function () {
+
+            $('#send').click(function () {
+                let message = $('#message-input').val();  
+                if(message){
+                    socket.emit('send_message', {
+                        chatid: "{{ id }}",
+                        userid: "{{ session['user'].userid }}",
+                        username: "{{ session['user'].username }}",
+                        message: message
+                    })
+                    $('#message-input').val('')
+                } 
             })
-            $('#message-input').val('')
-        })
+
+        });
 
         socket.on('receive_message', function(data) {
             $('#message-container').append(
                 '<div>' + data.username + ': ' + data.message + '</div>'
-            );
-        })
+            )
+        });
+
+        function deletemessage(user, id) {
+            socket.emit('delete_message', {
+                userid: user,
+                logid: id
+            })
+            let deleteIM = $("#IM-"+id);
+            deleteIM.empty();
+        };
 
         window.onbeforeunload = function (data) {
             socket.emit('leave_room', {
